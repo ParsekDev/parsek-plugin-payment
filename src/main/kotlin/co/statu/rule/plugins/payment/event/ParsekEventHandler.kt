@@ -14,7 +14,8 @@ class ParsekEventHandler : ParsekEventListener {
             PaymentPlugin.INSTANCE,
             PaymentConfig::class.java,
             logger,
-            listOf()
+            listOf(),
+            listOf("payment")
         )
 
         logger.info("Initialized plugin config")

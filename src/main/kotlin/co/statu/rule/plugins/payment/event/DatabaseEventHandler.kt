@@ -7,6 +7,7 @@ import co.statu.rule.plugins.payment.PaymentSystem
 
 class DatabaseEventHandler : DatabaseEventListener {
     override suspend fun onReady(databaseManager: DatabaseManager) {
+        databaseManager.migrateNewPluginId("payment", PaymentPlugin.INSTANCE.context.pluginId, PaymentPlugin.INSTANCE)
         databaseManager.initialize(PaymentPlugin.INSTANCE, PaymentPlugin.tables, PaymentPlugin.migrations)
 
         PaymentPlugin.databaseManager = databaseManager
