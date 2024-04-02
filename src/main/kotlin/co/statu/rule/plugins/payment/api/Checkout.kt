@@ -3,11 +3,10 @@ package co.statu.rule.plugins.payment.api
 import co.statu.parsek.api.config.PluginConfigManager
 import co.statu.parsek.config.ConfigManager.Companion.putAll
 import co.statu.rule.auth.db.model.User
-import co.statu.rule.database.Dao.Companion.get
 import co.statu.rule.database.DatabaseManager
 import co.statu.rule.plugins.payment.PaymentConfig
-import co.statu.rule.plugins.payment.PaymentPlugin
 import co.statu.rule.plugins.payment.db.dao.PurchaseDao
+import co.statu.rule.plugins.payment.db.impl.PurchaseDaoImpl
 import co.statu.rule.plugins.payment.db.model.BillDetail
 import co.statu.rule.plugins.payment.db.model.Purchase
 import co.statu.rule.plugins.payment.db.model.PurchaseStatus
@@ -23,9 +22,7 @@ class Checkout internal constructor(
     val typeListener: TypeListener,
     val methodIntegration: PaymentMethodIntegration,
 ) {
-    private val purchaseDao by lazy {
-        get<PurchaseDao>(PaymentPlugin.tables)
-    }
+    private val purchaseDao: PurchaseDao = PurchaseDaoImpl()
 
     private val paymentConfig by lazy {
         pluginConfigManager.config

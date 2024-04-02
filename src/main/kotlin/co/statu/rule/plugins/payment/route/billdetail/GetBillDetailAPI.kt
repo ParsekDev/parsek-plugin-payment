@@ -1,5 +1,6 @@
 package co.statu.rule.plugins.payment.route.billdetail
 
+import co.statu.parsek.annotation.Endpoint
 import co.statu.parsek.error.NotExists
 import co.statu.parsek.model.Path
 import co.statu.parsek.model.Result
@@ -8,10 +9,10 @@ import co.statu.parsek.model.Successful
 import co.statu.parsek.util.UUIDUtil
 import co.statu.rule.auth.api.LoggedInApi
 import co.statu.rule.auth.provider.AuthProvider
-import co.statu.rule.database.Dao.Companion.get
 import co.statu.rule.database.DatabaseManager
 import co.statu.rule.plugins.payment.PaymentPlugin
 import co.statu.rule.plugins.payment.db.dao.BillDetailDao
+import co.statu.rule.plugins.payment.db.impl.BillDetailDaoImpl
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.validation.ValidationHandler
 import io.vertx.ext.web.validation.builder.Parameters
@@ -20,10 +21,18 @@ import io.vertx.json.schema.SchemaParser
 import io.vertx.json.schema.common.dsl.Schemas
 import java.util.*
 
+@Endpoint
 class GetBillDetailAPI(
-    private val databaseManager: DatabaseManager,
-    private val authProvider: AuthProvider
+    private val paymentPlugin: PaymentPlugin
 ) : LoggedInApi() {
+    private val authProvider by lazy {
+        paymentPlugin.pluginBeanContext.getBean(AuthProvider::class.java)
+    }
+
+    private val databaseManager by lazy {
+        paymentPlugin.pluginBeanContext.getBean(DatabaseManager::class.java)
+    }
+
     override val paths = listOf(Path("/billDetails/:id", RouteType.GET))
 
     override fun getValidationHandler(schemaParser: SchemaParser): ValidationHandler =
@@ -31,9 +40,7 @@ class GetBillDetailAPI(
             .pathParameter(Parameters.param("id", Schemas.stringSchema()))
             .build()
 
-    private val billDetailDao by lazy {
-        get<BillDetailDao>(PaymentPlugin.tables)
-    }
+    private val billDetailDao: BillDetailDao = BillDetailDaoImpl()
 
     override suspend fun handle(context: RoutingContext): Result {
         val parameters = getParameters(context)

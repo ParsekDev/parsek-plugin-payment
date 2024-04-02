@@ -1,22 +1,21 @@
 package co.statu.rule.plugins.payment.event
 
+import co.statu.parsek.api.annotation.EventListener
 import co.statu.rule.database.DatabaseManager
 import co.statu.rule.database.event.DatabaseEventListener
 import co.statu.rule.plugins.payment.PaymentPlugin
 import co.statu.rule.plugins.payment.PaymentSystem
 
-class DatabaseEventHandler : DatabaseEventListener {
+@EventListener
+class DatabaseEventHandler(private val paymentPlugin: PaymentPlugin) : DatabaseEventListener {
+    private val paymentSystem by lazy {
+        paymentPlugin.pluginBeanContext.getBean(PaymentSystem::class.java)
+    }
+
     override suspend fun onReady(databaseManager: DatabaseManager) {
-        databaseManager.migrateNewPluginId("payment", PaymentPlugin.INSTANCE.context.pluginId, PaymentPlugin.INSTANCE)
-        databaseManager.initialize(PaymentPlugin.INSTANCE, PaymentPlugin.tables, PaymentPlugin.migrations)
+        databaseManager.migrateNewPluginId("payment", paymentPlugin.pluginId, paymentPlugin)
+        databaseManager.initialize(paymentPlugin, paymentPlugin)
 
-        PaymentPlugin.databaseManager = databaseManager
-
-        PaymentPlugin.paymentSystem = PaymentSystem.create(
-            PaymentPlugin.databaseManager, PaymentPlugin.INSTANCE.context.vertx,
-            PaymentPlugin.logger
-        )
-
-        PaymentPlugin.paymentSystem.start()
+        paymentSystem.start()
     }
 }

@@ -1,8 +1,8 @@
 package co.statu.rule.plugins.payment.event
 
-import co.statu.parsek.api.PluginEvent
+import co.statu.parsek.api.event.PluginEventListener
 import co.statu.rule.plugins.payment.PaymentSystem
 
-interface PaymentEventListener : PluginEvent {
+interface PaymentEventListener : PluginEventListener {
     fun onPaymentSystemInit(paymentSystem: PaymentSystem) {}
 }

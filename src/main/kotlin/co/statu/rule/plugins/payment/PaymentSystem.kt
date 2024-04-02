@@ -1,43 +1,45 @@
 package co.statu.rule.plugins.payment
 
-import co.statu.rule.database.Dao.Companion.get
+import co.statu.parsek.PluginEventManager
 import co.statu.rule.database.DatabaseManager
 import co.statu.rule.plugins.payment.api.PaymentCallbackHandler
 import co.statu.rule.plugins.payment.api.PaymentMethodIntegration
 import co.statu.rule.plugins.payment.api.TypeListener
 import co.statu.rule.plugins.payment.db.dao.PurchaseDao
+import co.statu.rule.plugins.payment.db.impl.PurchaseDaoImpl
 import co.statu.rule.plugins.payment.event.PaymentEventListener
 import io.vertx.core.Vertx
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.slf4j.Logger
+import org.springframework.beans.factory.config.ConfigurableBeanFactory
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
 
-class PaymentSystem private constructor(
-    private val databaseManager: DatabaseManager,
+@Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
+class PaymentSystem(
+    private val paymentPlugin: PaymentPlugin,
     private val vertx: Vertx,
     private val logger: Logger
 ) {
-    companion object {
-        internal fun create(databaseManager: DatabaseManager, vertx: Vertx, logger: Logger) =
-            PaymentSystem(databaseManager, vertx, logger)
+    private val databaseManager by lazy {
+        paymentPlugin.pluginBeanContext.getBean(DatabaseManager::class.java)
+    }
+
+    val paymentCallbackHandler: PaymentCallbackHandler by lazy {
+        paymentPlugin.pluginBeanContext.getBean(PaymentCallbackHandler::class.java)
     }
 
     private val typeListeners = mutableListOf<TypeListener>()
     private val paymentMethodIntegrations = mutableListOf<PaymentMethodIntegration>()
     private var schedulerId: Long? = null
 
-    private val purchaseDao by lazy {
-        get<PurchaseDao>(PaymentPlugin.tables)
-    }
-
-    val paymentCallbackHandler by lazy {
-        PaymentCallbackHandler()
-    }
+    private val purchaseDao: PurchaseDao = PurchaseDaoImpl()
 
     init {
-        val paymentEventHandlers =
-            PaymentPlugin.INSTANCE.context.pluginEventManager.getEventHandlers<PaymentEventListener>()
+        val paymentEventHandlers = PluginEventManager.getEventListeners<PaymentEventListener>()
 
         paymentEventHandlers.forEach {
             it.onPaymentSystemInit(this)

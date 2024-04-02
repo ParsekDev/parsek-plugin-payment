@@ -1,27 +1,32 @@
 package co.statu.rule.plugins.payment.api
 
-import co.statu.rule.database.Dao.Companion.get
+import co.statu.rule.database.DatabaseManager
 import co.statu.rule.plugins.payment.PaymentPlugin
+import co.statu.rule.plugins.payment.PaymentSystem
 import co.statu.rule.plugins.payment.db.dao.PurchaseDao
+import co.statu.rule.plugins.payment.db.impl.PurchaseDaoImpl
 import co.statu.rule.plugins.payment.db.model.PurchaseStatus
 import co.statu.rule.plugins.payment.error.InvalidPurchase
+import org.springframework.beans.factory.config.ConfigurableBeanFactory
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
 import java.util.*
 
-class PaymentCallbackHandler internal constructor() {
-    private val purchaseDao by lazy {
-        get<PurchaseDao>(PaymentPlugin.tables)
-    }
-
+@Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
+class PaymentCallbackHandler(private val paymentPlugin: PaymentPlugin) {
     private val databaseManager by lazy {
-        PaymentPlugin.databaseManager
-    }
-
-    private val jdbcPool by lazy {
-        databaseManager.getConnectionPool()
+        paymentPlugin.pluginBeanContext.getBean(DatabaseManager::class.java)
     }
 
     private val paymentSystem by lazy {
-        PaymentPlugin.paymentSystem
+        paymentPlugin.pluginBeanContext.getBean(PaymentSystem::class.java)
+    }
+
+    private val purchaseDao: PurchaseDao = PurchaseDaoImpl()
+
+    private val jdbcPool by lazy {
+        databaseManager.getConnectionPool()
     }
 
     suspend fun validatePurchase(purchaseId: UUID, userId: UUID, purchaseStatus: PurchaseStatus) {
