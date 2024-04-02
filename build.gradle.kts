@@ -30,8 +30,8 @@ dependencies {
         compileOnly(project(mapOf("path" to ":plugins:parsek-plugin-auth")))
     } else {
         compileOnly("com.github.StatuParsek:Parsek:main-SNAPSHOT")
-        compileOnly("com.github.StatuParsek:parsek-plugin-database:v1.0.0")
-        compileOnly("com.github.StatuParsek:parsek-plugin-auth:v1.0.1")
+        compileOnly("com.github.StatuParsek:parsek-plugin-database:main-SNAPSHOT")
+        compileOnly("com.github.StatuParsek:parsek-plugin-auth:main-SNAPSHOT")
     }
 
     compileOnly(kotlin("stdlib-jdk8"))
