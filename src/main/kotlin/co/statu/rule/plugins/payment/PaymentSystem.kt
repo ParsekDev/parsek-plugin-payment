@@ -14,11 +14,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
+import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
+@Lazy
 class PaymentSystem(
     private val paymentPlugin: PaymentPlugin,
     private val vertx: Vertx,
@@ -39,6 +41,7 @@ class PaymentSystem(
     private val purchaseDao: PurchaseDao = PurchaseDaoImpl()
 
     init {
+        println("geldi")
         val paymentEventHandlers = PluginEventManager.getEventListeners<PaymentEventListener>()
 
         paymentEventHandlers.forEach {
