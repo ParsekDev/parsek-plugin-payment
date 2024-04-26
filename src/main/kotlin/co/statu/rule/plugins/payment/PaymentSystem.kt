@@ -41,7 +41,6 @@ class PaymentSystem(
     private val purchaseDao: PurchaseDao = PurchaseDaoImpl()
 
     init {
-        println("geldi")
         val paymentEventHandlers = PluginEventManager.getEventListeners<PaymentEventListener>()
 
         paymentEventHandlers.forEach {
