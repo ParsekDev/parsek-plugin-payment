@@ -15,11 +15,8 @@ class CoreEventHandler(
 ) : CoreEventListener {
     override suspend fun onConfigManagerReady(configManager: ConfigManager) {
         val pluginConfigManager = PluginConfigManager(
-            configManager,
             paymentPlugin,
             PaymentConfig::class.java,
-            listOf(),
-            listOf("payment")
         )
 
         paymentPlugin.pluginBeanContext.beanFactory.registerSingleton(

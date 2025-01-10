@@ -13,7 +13,6 @@ class DatabaseEventHandler(private val paymentPlugin: PaymentPlugin) : DatabaseE
     }
 
     override suspend fun onReady(databaseManager: DatabaseManager) {
-        databaseManager.migrateNewPluginId("payment", paymentPlugin.pluginId, paymentPlugin)
         databaseManager.initialize(paymentPlugin, paymentPlugin)
 
         paymentSystem.start()
